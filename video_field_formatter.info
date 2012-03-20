@@ -1,0 +1,8 @@
+name = "Video Field Formatter"
+description = "A formatter for fields that contain a video of some kind."
+core = "7.x"
+package = "Fields"
+php = "5.x"
+version = "7.x-1.0"
+project = "video_field_formatter"
+dependencies[] = "libraries"
