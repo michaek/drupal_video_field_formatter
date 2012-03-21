@@ -1,5 +1,7 @@
 <?php 
 
+require_once 'video_field_formatter.plugins.inc';
+
 function video_field_formatter_field_formatter_info() {
   $formatters['jwplayer'] = array(
     'label' => 'jwPlayer',
@@ -44,26 +46,26 @@ function video_field_formatter_field_formatter_view($entity_type, $entity, $fiel
       drupal_add_js(libraries_get_path('jwplayer').'/jwplayer.js');
       drupal_add_js(drupal_get_path('module', 'video_field_formatter').'/video_field_formatter.js');
       drupal_add_js(array('video_field_formatter_jwplayer_url' => base_path().libraries_get_path('jwplayer').'/player.swf'), 'setting');
+      // $item_dump = print_r($item, TRUE);
+      // $settings_dump = print_r($settings, TRUE);
 
       foreach ($items as $delta => $item) {
         switch ($field['type']) {
           case 'link_field':
             $url = $item['url'];
-            // TODO: abstract URL handling for providers
-            $url = str_replace('youtu.be/', 'youtu.be/v/', $url);
-            // $item_dump = print_r($item, TRUE);
-            // $settings_dump = print_r($settings, TRUE);
+            
+            $providers = video_field_formatter_get_provider_handlers();
+            foreach ($providers as $provider) {
+              $provider->process_url($url, $settings);
+            }
+            
             break;
           case 'file':
-            // krumo($item);
-            // krumo(field_view_value($entity_type, $entity, $field['field_name'], $item));
-            // print ;
             $url = file_create_url($item['uri']);
             break;
         }
 
         $dom_id = drupal_html_id('video_'.$entity_type.'_'.entity_id($entity_type, $entity).'_'.$field['field_name'].'_'.$delta);
-        // drupal_add_js('jwplayer("'.$dom_id.'").setup({flashplayer: "'.$player.'", file: "'.$url.'"'.$dimensions.'});', 'inline');
         $element[$delta] = array('#markup' => '<div id="'.$dom_id.'"></div>');
         drupal_add_js(array('video_field_formatter' => array($dom_id => $settings + array('url' => $url))), 'setting');
       }
